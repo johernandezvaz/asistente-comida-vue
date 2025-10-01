@@ -1,0 +1,32 @@
+@import 'tailwindcss';
+
+@theme inline {
+    /* La paleta de colores fue pensada en la comida */
+    --color--tomato: #ff6b6b;
+    --color--tomato-dark: #ee5a52;
+    --color-orange: #ff9f43;
+    --color-orange-light: #ffa94d;
+    --color-avocado: #26de81;
+    --color-avocado-dark: #20bf7b;
+    --color-lemon: #fed330;
+    --color-pepper: #fd7272;
+    --color-cream: #fff5e6;
+    --color-dark: #2d3436;
+    --color-gray: #636e72;
+    --color-light-gray: #dfe6e9;
+
+    /* Tokens Semanticos */
+    --color-primay: var(--color--tomato);
+    --color-primary-hover: var(--color--tomato-dark);
+    --color-secondary: var(--color-avocado);
+    --color-secondary-hover: var(--color-avocado-dark);
+    --color-accent: var(--color-orange);
+    --color-background: var(--color-cream);
+    --color-surface: #ffffff;
+    --color-text: var(--color-dark);
+    --color-text-muted: var(--color-gray);
+    --color-border: var(--color-light-gray);
+
+    /* Espaciado */
+
+}
