@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import VoiceInput from './components/VoiceInput.vue'
 import ChatDisplay from './components/ChatDisplay.vue'
 import RecipeCard from './components/RecipeCard.vue'
-import { searchRecipes, saveRecipe } from './services/api'
+import { searchRecipes } from './services/api'
 import { generateAIResponse } from './services/gemini'
 
 const messages = ref([
@@ -19,8 +19,7 @@ const recipes = ref([])
 const isLoading = ref(false)
 
 const handleTranscript = (transcript) => {
-  // Transcript is being updated in real-time
-  console.log('[v0] Transcript updated:', transcript)
+  console.log('Transcript updated:', transcript)
 }
 
 const handleSendMessage = async (message) => {
@@ -37,16 +36,16 @@ const handleSendMessage = async (message) => {
   isLoading.value = true
 
   try {
-    // Check if user wants to search for recipes
+    // Verificar si el usuaroi quiere ver recetas
     const searchKeywords = ['receta', 'cocinar', 'preparar', 'hacer', 'ingredientes', 'comida', 'plato']
     const shouldSearchRecipes = searchKeywords.some(keyword => message.toLowerCase().includes(keyword))
 
     if (shouldSearchRecipes) {
-      // Search recipes using Spoonacular
+      // Buscar recetas
       const recipeResults = await searchRecipes(message)
       recipes.value = recipeResults
 
-      // Generate AI response about the recipes
+      // Generar respuestas de las recetas
       const aiResponse = await generateAIResponse(message, recipeResults)
 
       messages.value.push({
@@ -56,7 +55,7 @@ const handleSendMessage = async (message) => {
         timestamp: new Date()
       })
     } else {
-      // Just get AI response
+      // Obtener la respuesta de la IA
       const aiResponse = await generateAIResponse(message)
 
       messages.value.push({
@@ -67,7 +66,7 @@ const handleSendMessage = async (message) => {
       })
     }
   } catch (error) {
-    console.error('[v0] Error processing message:', error)
+    console.error('Error processing message:', error)
     messages.value.push({
       id: Date.now() + 1,
       type: 'bot',
@@ -78,52 +77,65 @@ const handleSendMessage = async (message) => {
     isLoading.value = false
   }
 }
-
-const handleSaveRecipe = async (recipe) => {
-  try {
-    await saveRecipe(recipe)
-
-    messages.value.push({
-      id: Date.now(),
-      type: 'bot',
-      text: `✅ ¡Receta "${recipe.title}" guardada exitosamente!`,
-      timestamp: new Date()
-    })
-  } catch (error) {
-    console.error('[v0] Error saving recipe:', error)
-    messages.value.push({
-      id: Date.now(),
-      type: 'bot',
-      text: '❌ Hubo un error al guardar la receta. Por favor, intenta de nuevo.',
-      timestamp: new Date()
-    })
-  }
-}
 </script>
 
 <template>
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+  <div class="min-h-screen bg-[var(--color-background)] flex flex-col">
+    Header
+    <header class="bg-[var(--color-surface)] shadow-[var(--shadow-sm)] sticky top-0 z-50">
+      <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-gradient-to-br from-[var(--color-tomato)] to-[var(--color-orange)] rounded-2xl flex items-center justify-center text-2xl">
+            🍽️
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-[var(--color-text)]">Chef Virtual</h1>
+            <p class="text-xs text-[var(--color-text-muted)]">Tu asistente de cocina</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-[var(--color-text-muted)] hidden sm:inline">Habla y descubre recetas</span>
+          <div class="w-2 h-2 bg-[var(--color-avocado)] rounded-full animate-pulse"></div>
+        </div>
+      </div>
+    </header>
+
+    Main Content
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
+      Voice Input Component
+      <VoiceInput
+          @transcript="handleTranscript"
+          @send-message="handleSendMessage"
+      />
+
+      Chat Display Component
+      <ChatDisplay
+          :messages="messages"
+          :is-loading="isLoading"
+      />
+
+      Recipe Results
+      <div v-if="recipes.length > 0" class="space-y-4">
+        <h2 class="text-2xl font-bold text-[var(--color-text)] flex items-center gap-2">
+          <span>🍳</span>
+          <span>Recetas Encontradas</span>
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <RecipeCard
+              v-for="recipe in recipes"
+              :key="recipe.id"
+              :recipe="recipe"
+          />
+        </div>
+      </div>
+    </main>
+
+    Footer
+    <footer class="bg-[var(--color-surface)] border-t border-[var(--color-border)] py-4 mt-auto">
+      <div class="max-w-6xl mx-auto px-4 text-center text-sm text-[var(--color-text-muted)]">
+        <p>Asistente de Comida con IA • Powered by Gemini & Spoonacular</p>
+      </div>
+    </footer>
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-</style>

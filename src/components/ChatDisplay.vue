@@ -9,6 +9,12 @@ defineProps({
     default: false,
   }
 })
+
+function formatTime(timestamp){
+  if(!timestamp) return ''
+  const date = new Date(timestamp)
+  return date.toLocaleDateString([], {hour: '2-digit', minute: '2-digit'})
+}
 </script>
 
 <template>
