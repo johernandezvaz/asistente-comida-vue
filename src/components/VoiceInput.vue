@@ -1,88 +1,78 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref } from 'vue'
 const emit = defineEmits(['transcript', 'send-message'])
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
 
-const isSupported = ref(false)
+const isSupported = ref(true) // MediaRecorder está soportado en la mayoría de navegadores modernos
 const isListening = ref(false)
 const transcript = ref('')
 const manualInput = ref('')
 const error = ref('')
 
-let recognition = null
 
-onMounted(() => {
-  // Verificar si el buscador soporta Web Speech API
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
 
-  if (SpeechRecognition) {
-    isSupported.value = true
-    recognition = new SpeechRecognition()
-    recognition.lang = 'es-ES'
-    recognition.continuous = false
-    recognition.interimResults = true
+let mediaRecorder = null
+let audioChunks = []
 
-    recognition.onStart = () => {
-      console.log('Voice recognition started')
+const toggleListening = async () => {
+  error.value = ''
+  transcript.value = ''
+
+  if (isListening.value) {
+    // Detener grabación
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+      mediaRecorder.stop()
+    }
+    return
+  }
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    mediaRecorder = new MediaRecorder(stream)
+    audioChunks = []
+
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data)
+
+    mediaRecorder.onstart = () => {
       isListening.value = true
-      error.value = ''
     }
 
-    recognition.onresult = ( event ) => {
-      const current = event.resultIndex
-      const transcriptResult = event.results[current][0].transcript
+    mediaRecorder.onstop = async () => {
+      isListening.value = false
+      const blob = new Blob(audioChunks, { type: "audio/wav" })
+      const formData = new FormData()
+      formData.append("file", blob, "recording.wav")
 
-      transcript.value = transcriptResult
-      emit('transcript', transcriptResult)
-
-      // Si es el resultado final, se envia un mensaje
-      if (event.results[current].isFinal) {
-        console.log('Final Transcript: ', transcriptResult)
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/speech-to-text`, {
+          method: "POST",
+          body: formData
+        })
+        if (!res.ok) {
+          throw new Error(`Error del servidor: ${res.statusText}`)
+        }
+        const data = await res.json()
+        transcript.value = data.transcript || ''
+        emit('transcript', transcript.value)
+      } catch (err) {
+        console.error(err)
+        error.value = 'No se pudo transcribir el audio. Intenta de nuevo.'
       }
     }
 
-    recognition.onerror = ( event ) => {
-      console.error('Speech Recognition Error: ', event.error)
-      isListening.value = false
+    mediaRecorder.start()
+    // Opcional: detener automáticamente después de X segundos
+    // setTimeout(() => mediaRecorder.stop(), 10000)
 
-      if (event.error === 'no-speech'){
-        error.value = 'No se detectó ninguna voz. Por favor, intenta de nuevo'
-      } else if (event.error === 'not-allowed'){
-        error.value = 'Permiso de microfono denegado. Por favor, habilita el microfono'
-      }else{
-        error.value = `Error: ${event.error}`
-      }
-    }
-
-    recognition.onend = () => {
-      console.log('Voice recognition ended')
-      isListening.value = false
-    }
-  }else{
-    console.warn('Speech recognition not supported')
-  }
-})
-
-onUnmounted(() => {
-  if(recognition){
-    recognition.stop()
-  }
-})
-
-const toggleListening = () => {
-  if (!recognition) return
-
-  if( isListening.value ){
-    recognition.stop()
-  }else{
-    transcript.value = ''
-    error.value = ''
-    recognition.start()
+  } catch (err) {
+    console.error(err)
+    error.value = 'No se pudo acceder al micrófono. Revisa los permisos.'
   }
 }
 
 const sendManualMessage = () => {
   if (manualInput.value.trim()) {
-    emit('send-message', manualInput.value)
+    emit('send-message', manualInput.value.trim())
     manualInput.value = ''
   }
 }

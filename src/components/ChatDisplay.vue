@@ -1,5 +1,8 @@
 <script setup>
-defineProps({
+import { marked } from 'marked'
+import { computed } from 'vue'
+
+const props = defineProps({
   messages: {
     type: Array,
     required: true,
@@ -13,57 +16,60 @@ defineProps({
 function formatTime(timestamp){
   if(!timestamp) return ''
   const date = new Date(timestamp)
-  return date.toLocaleDateString([], {hour: '2-digit', minute: '2-digit'})
+  return date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
+}
+
+function renderMarkdown(text) {
+  return marked(text, { breaks: true })
 }
 </script>
 
 <template>
-  <div class="kitchen-chat-board">
-    <div class="board-header">
-      <h2 class="board-title">
+  <div class="chat-container">
+    <div class="chat-header">
+      <h2 class="chat-title">
         <span class="title-icon">💬</span>
-        <span>Conversación en la Cocina</span>
+        Conversación
       </h2>
-      <div class="kitchen-decoration">
-        <span>🥘</span>
-      </div>
     </div>
 
-    <div class="messages-container">
+    <div class="messages-area">
       <div
           v-for="message in messages"
           :key="message.id"
           class="message-wrapper animate-fade-in"
-          :class="message.type === 'user' ? 'user-side' : 'chef-side'"
+          :class="message.type === 'user' ? 'user-message-wrapper' : 'bot-message-wrapper'"
       >
-        <div
-            class="message-bubble"
-            :class="message.type === 'user' ? 'user-message' : 'chef-message'"
-        >
+        <div class="message-bubble" :class="message.type === 'user' ? 'user-bubble' : 'bot-bubble'">
           <div class="message-avatar">
             {{ message.type === 'user' ? '👤' : '👨‍🍳' }}
           </div>
-          <div class="message-content">
-            <p class="message-text">{{ message.text }}</p>
-            <span class="message-time">
+          <div class="message-body">
+            <div
+                v-if="message.type === 'bot'"
+                class="message-text markdown-content"
+                v-html="renderMarkdown(message.text)"
+            ></div>
+            <p v-else class="message-text">{{ message.text }}</p>
+            <span class="message-timestamp">
               {{ formatTime(message.timestamp) }}
             </span>
           </div>
         </div>
       </div>
 
-      <div v-if="isLoading" class="message-wrapper chef-side animate-fade-in">
-        <div class="message-bubble chef-message cooking-message">
-          <div class="message-avatar cooking-avatar">
+      <div v-if="isLoading" class="message-wrapper bot-message-wrapper animate-fade-in">
+        <div class="message-bubble bot-bubble loading-bubble">
+          <div class="message-avatar">
             👨‍🍳
           </div>
-          <div class="message-content">
-            <div class="cooking-indicator">
-              <span class="cooking-dot"></span>
-              <span class="cooking-dot"></span>
-              <span class="cooking-dot"></span>
+          <div class="message-body">
+            <div class="loading-dots">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
             </div>
-            <span class="cooking-text">Cocinando tu respuesta...</span>
+            <span class="loading-text">Pensando...</span>
           </div>
         </div>
       </div>
@@ -72,55 +78,41 @@ function formatTime(timestamp){
 </template>
 
 <style scoped>
-.kitchen-chat-board {
-  background: linear-gradient(145deg, #FFFFFF 0%, #F8F8F8 100%);
-  border-radius: 2rem;
-  box-shadow:
-      0 8px 24px rgba(0,0,0,0.15),
-      inset 0 2px 4px rgba(255,255,255,0.9);
-  border: 4px solid #E8E8E8;
+.chat-container {
+  background: white;
+  border-radius: var(--radius-xl);
   overflow: hidden;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
 }
 
-.board-header {
-  background: linear-gradient(135deg, #F5E6D3 0%, #E8D4B8 100%);
-  padding: 1.5rem;
-  border-bottom: 4px solid #8B4513;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.chat-header {
+  background: linear-gradient(135deg, #FAFAFA 0%, #F5F5F5 100%);
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
 }
 
-.board-title {
+.chat-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text);
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #2C3E50;
+  gap: 0.5rem;
 }
 
 .title-icon {
-  font-size: 2rem;
+  font-size: 1.5rem;
 }
 
-.kitchen-decoration {
-  font-size: 2rem;
-  animation: spin-slow 10s linear infinite;
-}
-
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.messages-container {
+.messages-area {
   padding: 1.5rem;
   max-height: 500px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
+  background: linear-gradient(135deg, #FAFAFA 0%, #FFFFFF 100%);
 }
 
 .message-wrapper {
@@ -128,54 +120,51 @@ function formatTime(timestamp){
   animation: fadeIn 0.3s ease-out;
 }
 
-.user-side {
+.user-message-wrapper {
   justify-content: flex-end;
 }
 
-.chef-side {
+.bot-message-wrapper {
   justify-content: flex-start;
 }
 
 .message-bubble {
-  max-width: 80%;
+  max-width: 75%;
   display: flex;
   gap: 0.75rem;
   padding: 1rem;
-  border-radius: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
-.user-message {
-  background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%);
-  border: 3px solid #E65100;
+.user-bubble {
+  background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%);
+  border: 1px solid #FF8C42;
   flex-direction: row-reverse;
+  color: white;
 }
 
-.chef-message {
-  background: linear-gradient(135deg, #FFFACD 0%, #FFF8DC 100%);
-  border: 3px solid #FFD700;
+.bot-bubble {
+  background: white;
+  border: 1px solid var(--color-border);
 }
 
-.cooking-message {
-  border: 3px dashed #4CAF50;
-  background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+.loading-bubble {
+  border: 1px dashed #4CAF50;
+  background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
 }
 
 .message-avatar {
-  font-size: 2.5rem;
+  font-size: 2rem;
   flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.cooking-avatar {
-  animation: chef-bounce 1s ease-in-out infinite;
-}
-
-@keyframes chef-bounce {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-5px) rotate(5deg); }
-}
-
-.message-content {
+.message-body {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -183,85 +172,164 @@ function formatTime(timestamp){
 }
 
 .message-text {
-  font-size: 1rem;
+  font-size: 0.9375rem;
   line-height: 1.6;
-  font-weight: 600;
-  color: #2C3E50;
+  color: var(--color-text);
 }
 
-.user-message .message-text {
+.user-bubble .message-text {
   color: white;
-  text-align: right;
 }
 
-.message-time {
+.message-timestamp {
   font-size: 0.75rem;
-  opacity: 0.7;
-  font-weight: 600;
-  color: #7F8C8D;
+  color: var(--color-text-muted);
+  font-weight: 500;
 }
 
-.user-message .message-time {
-  color: rgba(255,255,255,0.9);
+.user-bubble .message-timestamp {
+  color: rgba(255, 255, 255, 0.8);
   text-align: right;
 }
 
-.cooking-indicator {
+.loading-dots {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.375rem;
   align-items: center;
 }
 
-.cooking-dot {
-  width: 12px;
-  height: 12px;
+.dot {
+  width: 8px;
+  height: 8px;
   background: #4CAF50;
   border-radius: 50%;
-  animation: bounce-dot 1s ease-in-out infinite;
+  animation: bounce-dot 1.4s ease-in-out infinite;
 }
 
-.cooking-dot:nth-child(2) {
-  animation-delay: 0.15s;
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
   background: #FF8C42;
 }
 
-.cooking-dot:nth-child(3) {
-  animation-delay: 0.3s;
-  background: #E74C3C;
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+  background: #FF6B35;
 }
 
 @keyframes bounce-dot {
-  0%, 100% {
+  0%, 80%, 100% {
     transform: translateY(0);
   }
-  50% {
-    transform: translateY(-10px);
+  40% {
+    transform: translateY(-8px);
   }
 }
 
-.cooking-text {
+.loading-text {
   font-size: 0.875rem;
-  font-weight: bold;
+  font-weight: 600;
   color: #2E7D32;
   font-style: italic;
 }
 
-.messages-container::-webkit-scrollbar {
-  width: 8px;
+.messages-area::-webkit-scrollbar {
+  width: 6px;
 }
 
-.messages-container::-webkit-scrollbar-track {
-  background: #F5E6D3;
-  border-radius: 10px;
+.messages-area::-webkit-scrollbar-track {
+  background: #F5F5F5;
 }
 
-.messages-container::-webkit-scrollbar-thumb {
-  background: #8B4513;
-  border-radius: 10px;
+.messages-area::-webkit-scrollbar-thumb {
+  background: #BDBDBD;
+  border-radius: 3px;
 }
 
-.messages-container::-webkit-scrollbar-thumb:hover {
-  background: #654321;
+.messages-area::-webkit-scrollbar-thumb:hover {
+  background: #9E9E9E;
+}
+
+.markdown-content {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--color-text);
+}
+
+.markdown-content :deep(h1),
+.markdown-content :deep(h2),
+.markdown-content :deep(h3) {
+  font-weight: 700;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-text);
+}
+
+.markdown-content :deep(h1) {
+  font-size: 1.5rem;
+}
+
+.markdown-content :deep(h2) {
+  font-size: 1.25rem;
+}
+
+.markdown-content :deep(h3) {
+  font-size: 1.1rem;
+}
+
+.markdown-content :deep(p) {
+  margin-bottom: 0.75rem;
+}
+
+.markdown-content :deep(ul),
+.markdown-content :deep(ol) {
+  margin-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.markdown-content :deep(li) {
+  margin-bottom: 0.25rem;
+}
+
+.markdown-content :deep(code) {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.875em;
+}
+
+.markdown-content :deep(pre) {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin-bottom: 0.75rem;
+}
+
+.markdown-content :deep(pre code) {
+  background: none;
+  padding: 0;
+}
+
+.markdown-content :deep(strong) {
+  font-weight: 700;
+}
+
+.markdown-content :deep(em) {
+  font-style: italic;
+}
+
+.markdown-content :deep(a) {
+  color: #FF6B35;
+  text-decoration: underline;
+}
+
+.markdown-content :deep(blockquote) {
+  border-left: 3px solid #FF6B35;
+  padding-left: 1rem;
+  margin-left: 0;
+  margin-bottom: 0.75rem;
+  font-style: italic;
+  color: var(--color-text-muted);
 }
 </style>
-

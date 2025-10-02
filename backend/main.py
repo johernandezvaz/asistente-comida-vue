@@ -1,5 +1,5 @@
 # main.py
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
@@ -92,6 +92,57 @@ async def call_gemini(payload: dict) -> dict:
         logging.exception("Respuesta no JSON de Gemini")
         raise HTTPException(status_code=502, detail="Respuesta no JSON desde Gemini")
 
+
+@app.post("/api/speech-to-text")
+async def speech_to_text(file: UploadFile = File(...)):
+    """
+    Recibe un archivo de audio y devuelve la transcripción usando Gemini.
+    """
+    try:
+        import base64
+
+        audio_bytes = await file.read()
+        audio_base64 = base64.b64encode(audio_bytes).decode('utf-8')
+
+        mime_type = file.content_type or "audio/webm"
+
+        payload = {
+            "contents": [
+                {
+                    "parts": [
+                        {
+                            "text": "Transcribe el siguiente audio a texto en español:"
+                        },
+                        {
+                            "inline_data": {
+                                "mime_type": mime_type,
+                                "data": audio_base64
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+
+        data = await call_gemini(payload)
+
+        text = None
+        try:
+            text = data["candidates"][0]["content"]["parts"][0]["text"]
+        except Exception:
+            text = data.get("text") or (data.get("output") and data["output"].get("text"))
+
+        if not text:
+            logging.error("Estructura inesperada de Gemini en audio: %s", data)
+            raise HTTPException(status_code=502, detail="No se pudo obtener transcripción")
+
+        return {"transcript": text}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.exception("Error en /api/speech-to-text")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/models")
 async def list_models():
