@@ -1,4 +1,4 @@
-const SPOONACULAR_API_KEY = import.meta.env.SPOONACULAR_API_KEY
+const SPOONACULAR_API_KEY = import.meta.env.VITE_SPOONACULAR_API_KEY
 const SPOONACULAR_BASE_URL = "https://api.spoonacular.com"
 
 export async function searchRecipes(query) {

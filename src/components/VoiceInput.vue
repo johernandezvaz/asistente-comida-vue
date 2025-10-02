@@ -89,81 +89,336 @@ const sendManualMessage = () => {
 </script>
 
 <template>
-  <div class="bg-[var(--color-surface)] rounded-[var(--radius-xl)] shadow-[var(--shadow-md)] p-6">
+  <div class="mixing-bowl-container">
     <div class="flex flex-col gap-4">
-      Voice Button and Status
       <div class="flex items-center justify-center gap-4">
         <button
             @click="toggleListening"
             :disabled="!isSupported"
-            class="relative w-20 h-20 rounded-full flex items-center justify-center text-3xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-            :class="isListening
-            ? 'bg-[var(--color-primary)] text-white shadow-[var(--shadow-lg)] scale-110'
-            : 'bg-gradient-to-br from-[var(--color-tomato)] to-[var(--color-orange)] text-white hover:scale-105 shadow-[var(--shadow-md)]'"
+            class="microphone-pot"
+            :class="{ 'listening-active': isListening, 'pot-disabled': !isSupported }"
         >
-          <span v-if="isListening" class="animate-pulse">🎤</span>
-          <span v-else>🎙️</span>
-
-          Listening animation rings
+          <div class="pot-content">
+            <span v-if="isListening" class="animate-pulse text-4xl">🎤</span>
+            <span v-else class="text-4xl">🎙️</span>
+          </div>
           <span
               v-if="isListening"
-              class="absolute inset-0 rounded-full bg-[var(--color-primary)] opacity-75 animate-ping"
+              class="steam-ring steam-ring-1"
+          ></span>
+          <span
+              v-if="isListening"
+              class="steam-ring steam-ring-2"
+          ></span>
+          <span
+              v-if="isListening"
+              class="steam-ring steam-ring-3"
           ></span>
         </button>
 
-        <div class="flex flex-col gap-1">
-          <span class="text-lg font-bold text-[var(--color-text)]">
-            {{ isListening ? 'Escuchando...' : 'Hablar' }}
+        <div class="voice-status-board">
+          <span class="status-text">
+            {{ isListening ? '👂 Escuchando...' : '🗣️ Habla conmigo' }}
           </span>
-          <span class="text-sm text-[var(--color-text-muted)]">
-            {{ isListening ? 'Toca para detener' : 'Toca para comenzar' }}
+          <span class="status-subtext">
+            {{ isListening ? 'Toca la olla para detener' : 'Toca la olla para comenzar' }}
           </span>
         </div>
       </div>
 
-      Error Message
       <div
           v-if="error"
-          class="bg-red-50 border border-red-200 rounded-[var(--radius-md)] p-3 text-sm text-red-700"
+          class="alert-plate error-plate"
       >
+        <span class="text-xl mr-2">⚠️</span>
         {{ error }}
       </div>
 
-      Not Supported Message
       <div
           v-if="!isSupported"
-          class="bg-yellow-50 border border-yellow-200 rounded-[var(--radius-md)] p-3 text-sm text-yellow-700"
+          class="alert-plate warning-plate"
       >
-        ⚠️ Tu navegador no soporta reconocimiento de voz. Por favor, usa Chrome, Edge o Safari.
+        <span class="text-xl mr-2">⚠️</span>
+        Tu navegador no soporta reconocimiento de voz. Por favor, usa Chrome, Edge o Safari.
       </div>
 
-      Transcript Display
       <div
           v-if="transcript"
-          class="bg-gradient-to-r from-[var(--color-cream)] to-white rounded-[var(--radius-lg)] p-4 border-2 border-[var(--color-border)]"
+          class="recipe-note-card"
       >
-        <p class="text-sm text-[var(--color-text-muted)] mb-1">Tu mensaje:</p>
-        <p class="text-base text-[var(--color-text)] leading-relaxed">{{ transcript }}</p>
+        <div class="note-pin">📌</div>
+        <p class="note-label">Tu mensaje:</p>
+        <p class="note-content">{{ transcript }}</p>
       </div>
 
-      Manual Input
-      <div class="flex gap-2">
+      <div class="input-cutting-board">
         <input
             v-model="manualInput"
             @keyup.enter="sendManualMessage"
             type="text"
-            placeholder="O escribe tu mensaje aquí..."
-            class="flex-1 px-4 py-3 rounded-[var(--radius-lg)] border-2 border-[var(--color-border)] focus:border-[var(--color-primary)] focus:outline-none transition-colors"
+            placeholder="O escribe tu receta aquí... ✍️"
+            class="cutting-board-input"
         />
         <button
             @click="sendManualMessage"
             :disabled="!manualInput.trim()"
-            class="px-6 py-3 bg-gradient-to-r from-[var(--color-avocado)] to-[var(--color-avocado-dark)] text-white rounded-[var(--radius-lg)] font-semibold hover:shadow-[var(--shadow-md)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            class="send-button"
         >
-          Enviar
+          <span class="button-icon">🍳</span>
+          <span class="button-text">Cocinar</span>
         </button>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.mixing-bowl-container {
+  background: linear-gradient(145deg, #FFFFFF 0%, #F5F5F5 100%);
+  border-radius: 2rem;
+  padding: 2rem;
+  box-shadow:
+      0 8px 24px rgba(0,0,0,0.15),
+      inset 0 2px 4px rgba(255,255,255,0.9);
+  border: 4px solid #E8E8E8;
+  position: relative;
+}
+
+.mixing-bowl-container::before {
+  content: '🥣';
+  position: absolute;
+  top: -25px;
+  right: 20px;
+  font-size: 3rem;
+  transform: rotate(15deg);
+}
+
+.microphone-pot {
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, #C0C0C0 0%, #A8A8A8 50%, #909090 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 6px solid #808080;
+  box-shadow:
+      0 6px 20px rgba(0,0,0,0.3),
+      inset 0 -4px 8px rgba(0,0,0,0.4),
+      inset 0 2px 4px rgba(255,255,255,0.3);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.microphone-pot:hover:not(.pot-disabled) {
+  transform: scale(1.05);
+  box-shadow:
+      0 8px 28px rgba(0,0,0,0.4),
+      inset 0 -4px 8px rgba(0,0,0,0.4),
+      inset 0 2px 4px rgba(255,255,255,0.3);
+}
+
+.microphone-pot.listening-active {
+  background: radial-gradient(circle, #E74C3C 0%, #C0392B 50%, #A93226 100%);
+  border-color: #922B21;
+  animation: pot-bubble 1s ease-in-out infinite;
+  box-shadow:
+      0 0 30px rgba(231, 76, 60, 0.6),
+      0 6px 20px rgba(0,0,0,0.3),
+      inset 0 -4px 8px rgba(0,0,0,0.4);
+}
+
+@keyframes pot-bubble {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.pot-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pot-content {
+  position: relative;
+  z-index: 2;
+}
+
+.steam-ring {
+  position: absolute;
+  border: 3px solid rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  animation: steam-rise 2s ease-out infinite;
+}
+
+.steam-ring-1 {
+  width: 100%;
+  height: 100%;
+  animation-delay: 0s;
+}
+
+.steam-ring-2 {
+  width: 100%;
+  height: 100%;
+  animation-delay: 0.5s;
+}
+
+.steam-ring-3 {
+  width: 100%;
+  height: 100%;
+  animation-delay: 1s;
+}
+
+@keyframes steam-rise {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+.voice-status-board {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #F5E6D3 0%, #E8D4B8 100%);
+  padding: 1rem 1.5rem;
+  border-radius: 1rem;
+  border: 3px solid #8B4513;
+  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.3);
+}
+
+.status-text {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #2C3E50;
+}
+
+.status-subtext {
+  font-size: 0.875rem;
+  color: #7F8C8D;
+  font-weight: 600;
+}
+
+.alert-plate {
+  padding: 1rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.error-plate {
+  background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%);
+  border: 3px solid #E74C3C;
+  color: #C0392B;
+}
+
+.warning-plate {
+  background: linear-gradient(135deg, #FFF9E6 0%, #FFE8B3 100%);
+  border: 3px solid #FFD23F;
+  color: #8B6F00;
+}
+
+.recipe-note-card {
+  background: linear-gradient(135deg, #FFFACD 0%, #FFF8DC 100%);
+  border: 3px dashed #FFD700;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.note-pin {
+  position: absolute;
+  top: -10px;
+  right: 20px;
+  font-size: 2rem;
+}
+
+.note-label {
+  font-size: 0.875rem;
+  color: #7F8C8D;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.note-content {
+  font-size: 1.125rem;
+  color: #2C3E50;
+  line-height: 1.6;
+  font-weight: 600;
+}
+
+.input-cutting-board {
+  display: flex;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+  padding: 1rem;
+  border-radius: 1.5rem;
+  border: 4px solid #654321;
+  box-shadow: 0 6px 20px rgba(139, 69, 19, 0.4);
+}
+
+.cutting-board-input {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  border-radius: 1rem;
+  border: 3px solid #654321;
+  font-size: 1rem;
+  font-weight: 600;
+  background: #FFF9E6;
+  color: #2C3E50;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.cutting-board-input:focus {
+  border-color: #E74C3C;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+  transform: translateY(-2px);
+}
+
+.cutting-board-input::placeholder {
+  color: #95A5A6;
+}
+
+.send-button {
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #4CAF50 0%, #45A049 100%);
+  border: 3px solid #2E7D32;
+  border-radius: 1rem;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.send-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+}
+
+.send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button-icon {
+  font-size: 1.5rem;
+}
+
+.button-text {
+  font-size: 1rem;
+}
+</style>
 

@@ -1,9 +1,9 @@
-const GEMINI_API_KEY = import.meta.env.GEMINI_API_KEY
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
+
 
 export async function generateAIResponse(userMessage, recipes = null) {
     try {
-        console.log("[v0] Generating AI response for:", userMessage)
+        console.log("Generating AI response for:", userMessage)
 
         if (!GEMINI_API_KEY) {
             console.warn("Gemini API key not found, using fallback response")
@@ -23,7 +23,7 @@ Usuario: ${userMessage}`
                 "\nPor favor, presenta estas recetas de manera atractiva y sugiere cuál podría ser mejor según el contexto."
         }
 
-        const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+        const response = await fetch(`/api/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

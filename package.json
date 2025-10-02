@@ -11,6 +11,7 @@
   "dependencies": {
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
+    "dotenv": "^17.2.3",
     "lucide-react": "0.544.0",
     "shadcn": "3.3.1",
     "tailwind-merge": "3.3.1",

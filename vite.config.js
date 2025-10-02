@@ -1,9 +1,19 @@
-import { defineConfig } from 'vite'
-import tailwindcss from 'tailwindcss'
-import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import tailwindcss from 'tailwindcss';
 
-// https://vite.dev/config/
+const GEMINI_API_KEY = process.env.VITE_GEMINI_API_KEY;
+
 export default defineConfig({
-  plugins: [vue(),
-  tailwindcss(),],
-})
+    plugins: [vue(), tailwindcss()],
+    server: {
+        proxy: {
+            '/api': {
+                target: 'https://generativelanguage.googleapis.com',
+                changeOrigin: true,
+                secure: false,
+                rewrite: (path) => path.replace(/^\/api/, ''),
+            },
+        },
+    },
+});

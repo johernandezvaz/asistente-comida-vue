@@ -58,17 +58,29 @@ module.exports = {
                     DEFAULT: "#636e72",
                     light: "#dfe6e9",
                 },
+                surface: "var(--color-surface)",
+                text: {
+                    DEFAULT: "var(--color-text)",
+                    muted: "var(--color-text-muted)",
+                },
             },
             borderRadius: {
                 lg: "var(--radius)",
                 md: "calc(var(--radius) - 2px)",
                 sm: "calc(var(--radius) - 4px)",
-                xl: "2rem",
+                xl: "var(--radius-xl)",
+                "radius-sm": "var(--radius-sm)",
+                "radius-md": "var(--radius-md)",
+                "radius-lg": "var(--radius-lg)",
+                "radius-xl": "var(--radius-xl)",
             },
             boxShadow: {
-                sm: "0 2px 8px rgba(0, 0, 0, 0.08)",
-                md: "0 4px 16px rgba(0, 0, 0, 0.12)",
-                lg: "0 8px 32px rgba(0, 0, 0, 0.16)",
+                sm: "var(--shadow-sm)",
+                md: "var(--shadow-md)",
+                lg: "var(--shadow-lg)",
+                "shadow-sm": "var(--shadow-sm)",
+                "shadow-md": "var(--shadow-md)",
+                "shadow-lg": "var(--shadow-lg)",
             },
             keyframes: {
                 fadeIn: {

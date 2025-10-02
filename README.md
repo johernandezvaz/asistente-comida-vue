@@ -1,4 +1,4 @@
-# 🍽️ Asistente de Cocina con IA y Voz
+[# 🍽️ Asistente de Cocina con IA y Voz
 
 <div align="center">
 
@@ -46,11 +46,12 @@ Desarrollar una interfaz intuitiva y accesible que permita a los usuarios descub
 - Visualización de recetas con imágenes, tiempos de preparación y valores nutricionales
 - Enlaces directos a recetas completas
 
-### 🎨 Diseño Moderno
-- Interfaz responsive con diseño mobile-first
-- Paleta de colores inspirada en alimentos frescos
-- Animaciones fluidas y micro-interacciones
-- Tema visual consistente y atractivo
+### 🎨 Diseño Temático de Cocina
+- Interfaz responsive con diseño mobile-first inspirado en una cocina real
+- Elementos visuales divertidos: ollas, tablas de cortar, estantes de madera
+- Animaciones fluidas: llamas parpadeantes, vapor subiendo, utensilios balanceándose
+- Paleta de colores cálidos inspirada en materiales de cocina (madera, acero, cerámica)
+- Experiencia visual inmersiva que simula estar en una cocina profesional
 
 ### 💬 Chat Interactivo
 - Historial de conversación en tiempo real
@@ -160,8 +161,8 @@ generateAIResponse(message, recipes)
 
    Crear archivo `.env` en la raíz del proyecto:
    ```env
-   VITE_GEMINI_API_KEY=tu_clave_gemini_aqui
-   VITE_SPOONACULAR_API_KEY=tu_clave_spoonacular_aqui
+   GEMINI_API_KEY=tu_clave_gemini_aqui
+   SPOONACULAR_API_KEY=tu_clave_spoonacular_aqui
    ```
 
 4. **Obtener claves API**
@@ -212,40 +213,62 @@ generateAIResponse(message, recipes)
 
 ---
 
-## 🎨 Sistema de Diseño
+## 🎨 Sistema de Diseño Temático
 
-### Paleta de Colores
+### Paleta de Colores - Inspirada en la Cocina
 
-La paleta está inspirada en ingredientes frescos y vibrantes:
+La paleta está inspirada en materiales y elementos de una cocina profesional:
 
 | Color | Hexadecimal | Uso |
 |-------|-------------|-----|
-| 🍅 Tomate | `#ff6b6b` | Color primario, acciones principales |
-| 🍊 Naranja | `#ff9f43` | Color de acento, gradientes |
-| 🥑 Aguacate | `#26de81` | Color secundario, confirmaciones |
-| 🍋 Limón | `#fed330` | Destacados y alertas |
-| 🥛 Crema | `#fff5e6` | Fondo cálido |
-| ⚫ Carbón | `#2d3436` | Texto principal |
+| 🪵 Madera | `#8B4513` | Estantes, tablas de cortar, marcos |
+| 🥘 Acero Inoxidable | `#C0C0C0` | Ollas, sartenes, elementos metálicos |
+| 🔥 Llama Naranja | `#FF6B35` | Fuegos de estufa, elementos calientes |
+| 🥕 Naranja Zanahoria | `#FF8C42` | Botones de acción, acentos |
+| 🥬 Verde Vegetal | `#4CAF50` | Confirmaciones, elementos saludables |
+| 🧈 Crema | `#FFF9E6` | Fondos cálidos, superficies |
+| 🍯 Miel Dorada | `#FFD23F` | Destacados, temporizadores |
+| ⚫ Carbón | `#2C3E50` | Texto principal |
 
 ### Variables CSS Personalizadas
 
 ```css
 :root {
-  --color-primary: #ff6b6b;
-  --color-secondary: #26de81;
-  --color-background: #fafbfc;
-  --color-surface: #ffffff;
+  --color-wood: #8B4513;
+  --color-stainless: #C0C0C0;
+  --color-flame-orange: #FF6B35;
+  --color-veggie-green: #4CAF50;
+  --color-cream: #FFF9E6;
   --radius-xl: 2rem;
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
+  --shadow-wood: 0 4px 12px rgba(139, 69, 19, 0.3);
+  --shadow-pot: inset 0 2px 8px rgba(0,0,0,0.3);
 }
 ```
+
+### Elementos Visuales de Cocina
+
+- **🥣 Contenedor Principal**: Diseñado como un bol de mezcla
+- **🍳 Botón de Voz**: Estilizado como una olla que se calienta
+- **📋 Tabla de Chat**: Simulando una tabla de madera para tomar notas
+- **🔪 Tarjetas de Recetas**: Páginas de libro de cocina con bordes decorativos
+- **🪵 Estantes de Madera**: Header y footer con textura de madera
+- **🔥 Indicador de Estufa**: Llama animada que parpadea
+
+### Animaciones Temáticas
+
+- **Vapor Subiendo**: Anillos que se expanden cuando la "olla" está activa
+- **Llama Parpadeante**: Fuego animado en el indicador de estado
+- **Utensilios Balanceándose**: Cuchara, tenedor y cuchillo con movimiento sutil
+- **Chef Rebotando**: Avatar del chef que se mueve mientras "cocina" respuestas
+- **Vapor Flotante**: Elementos decorativos con movimiento vertical
 
 ### Principios de Diseño
 
 - **Espaciado Consistente**: Sistema basado en múltiplos de 8px
-- **Tipografía Clara**: Fuentes del sistema para mejor rendimiento
-- **Feedback Visual**: Animaciones suaves y estados interactivos
-- **Accesibilidad**: Alto contraste y elementos semánticos
+- **Tipografía Divertida**: Comic Sans para darle personalidad y calidez
+- **Feedback Visual**: Animaciones de cocina (vapor, llamas, movimiento)
+- **Experiencia Inmersiva**: Elementos que simulan estar en una cocina real
+- **Colores Cálidos**: Tonos tierra y naturales para ambiente acogedor
 
 ---
 
@@ -331,7 +354,7 @@ graph TD
 
 **José de Jesús Hernández Vázquez**
 
-Desarrollador Full Stack | Vue.js Specialist
+Desarrollador Full Stack
 
 *Proyecto desarrollado como prueba técnica para Artificial Nerds*
 
@@ -354,8 +377,9 @@ Este proyecto fue desarrollado con fines educativos y de evaluación técnica.
 
 <div align="center">
 
-**Desarrollado con ❤️ y ☕ para Artificial Nerds**
+**Desarrollado por José Hernández para Artificial Nerds**
 
 *Prueba Técnica - 2025*
 
 </div>
+]()
