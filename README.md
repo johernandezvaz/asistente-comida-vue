@@ -31,10 +31,12 @@ Desarrollar una interfaz intuitiva y accesible que permita a los usuarios descub
 ## ✨ Características
 
 ### 🎤 Reconocimiento de Voz
-- Implementación del **Web Speech API** para interacción por voz en tiempo real
-- Soporte nativo para español (es-ES)
-- Transcripción en tiempo real con feedback visual
+- Implementación con **MediaRecorder API** para captura de audio
+- Procesamiento de audio mediante **Google Gemini API**
+- Transcripción en tiempo real con feedback visual de estado (escuchando/procesando)
+- Soporte nativo para español
 - Manejo robusto de errores y permisos de micrófono
+- Indicadores visuales mientras se procesa el audio
 
 ### 🤖 IA Conversacional
 - Integración con **Google Gemini API** para respuestas contextuales inteligentes
@@ -71,9 +73,9 @@ Desarrollar una interfaz intuitiva y accesible que permita a los usuarios descub
 | **Vite** | 7.x | Build tool y servidor de desarrollo ultrarrápido |
 | **TailwindCSS** | 3.x | Framework CSS utility-first para estilos |
 | **FastAPI** | 0.115.x | Backend API para comunicación segura con Gemini |
-| **Web Speech API** | Nativa | Reconocimiento de voz del navegador |
-| **Google Gemini API** | - | Modelo de IA conversacional |
-| **Spoonacular API** | - | Base de datos de recetas y nutrición |
+| **MediaRecorder API** | Nativa | Captura de audio del navegador |
+| **Google Gemini API** | 2.5-pro | Modelo de IA conversacional y transcripción de audio |
+| **Marked** | - | Renderizado de Markdown en respuestas |
 
 ---
 
@@ -147,9 +149,11 @@ generateAIResponse(message, recipes)
 **`main.py`**
 - Servidor FastAPI con CORS habilitado
 - Endpoint `/api/chat` para conversaciones con Gemini
+- Endpoint `/api/speech-to-text` para transcripción de audio
 - Endpoint `/api/recipes` para generación de recetas
 - Manejo seguro de API keys en el servidor
 - Procesamiento de respuestas JSON de Gemini
+- Codificación de audio en base64 para envío a Gemini
 
 ---
 
@@ -229,33 +233,45 @@ La aplicación Vue estará disponible en `http://localhost:5173`
 
 ### Interacción por Voz
 
-1. Haz clic en el botón del micrófono (🎙️)
+1. Haz clic en el botón de la olla/micrófono (🎙️)
 2. Permite el acceso al micrófono cuando el navegador lo solicite
 3. Habla claramente en español
-4. El botón cambiará a modo escucha (🎤) con animación
-5. Tu mensaje se transcribirá automáticamente
+4. El botón cambiará a modo escucha (🎤) con animación de vapor
+5. Haz clic nuevamente para detener la grabación
+6. Verás el estado "Procesando..." mientras se transcribe el audio
+7. Tu mensaje transcrito se enviará automáticamente al asistente y recibirás una respuesta
 
 ### Ejemplos de Comandos
 
 ```
-"Dame una receta con pollo y arroz"
-"Busca recetas vegetarianas con tomate"
-"Quiero cocinar algo con pasta"
+"Qué recomiendas para la cena de hoy"
+"Dame ideas para un desayuno saludable"
+"Cómo preparo un arroz con pollo"
 "Recetas fáciles para principiantes"
-"Postres con chocolate"
+"Qué puedo cocinar con lo que tengo en casa"
+"Dame consejos para hacer un buen postre"
 ```
 
 ### Interacción por Texto
 
-1. Escribe tu mensaje en el campo de entrada
-2. Presiona Enter o haz clic en "Enviar"
-3. El asistente procesará tu solicitud
+1. Escribe tu mensaje en el campo de entrada (tabla de cortar)
+2. Presiona Enter o haz clic en el botón "Cocinar" (🍳)
+3. Verás tu mensaje en el chat y el asistente responderá automáticamente
 
-### Explorar Recetas
+### Indicadores de Estado
 
-- Las recetas aparecerán como tarjetas visuales
-- Haz clic en "Ver Receta" para acceder a instrucciones completas
-- Usa "Guardar" para marcar recetas favoritas
+**Durante la grabación:**
+- 🎤 Icono de micrófono pulsante
+- Anillos de vapor animados
+- Texto: "👂 Escuchando..."
+
+**Durante el procesamiento:**
+- ⚙️ Icono de engranaje
+- Texto: "⚙️ Procesando... / Transcribiendo tu audio"
+
+**Durante la respuesta del asistente:**
+- Puntos animados de carga en el chat
+- Texto: "Pensando..."
 
 ---
 
@@ -287,6 +303,26 @@ Procesa mensajes conversacionales con Gemini.
   "response": "¡Claro! Aquí tienes algunas ideas con pollo..."
 }
 ```
+
+#### POST `/api/speech-to-text`
+Transcribe audio a texto usando Gemini.
+
+**Request:**
+- Content-Type: `multipart/form-data`
+- Campo `file`: Archivo de audio (webm, wav, mp3)
+
+**Response:**
+```json
+{
+  "transcript": "Qué recomiendas para la cena de hoy"
+}
+```
+
+**Proceso interno:**
+1. Recibe el archivo de audio
+2. Codifica el audio en base64
+3. Envía a Gemini API con el prompt de transcripción
+4. Retorna el texto transcrito
 
 #### POST `/api/recipes`
 Genera recetas basadas en ingredientes.
@@ -387,14 +423,14 @@ uvicorn backend.main:app --host 0.0.0.0 --port 8000
 
 ## 🌐 Compatibilidad de Navegadores
 
-| Navegador | Versión Mínima | Soporte de Voz |
-|-----------|----------------|----------------|
+| Navegador | Versión Mínima | Soporte de MediaRecorder |
+|-----------|----------------|--------------------------|
 | Chrome | 89+ | ✅ Completo |
 | Edge | 89+ | ✅ Completo |
 | Safari | 14.1+ | ✅ Completo |
-| Firefox | 88+ | ⚠️ Limitado |
+| Firefox | 88+ | ✅ Completo |
 
-*Nota: El Web Speech API tiene soporte variable entre navegadores. Chrome/Edge ofrecen la mejor experiencia.*
+*Nota: La MediaRecorder API tiene excelente soporte en todos los navegadores modernos.*
 
 ---
 
@@ -403,30 +439,28 @@ uvicorn backend.main:app --host 0.0.0.0 --port 8000
 ```mermaid
 graph TD
     A[Usuario Inicia] --> B{Tipo de Entrada}
-    B -->|Voz| C[Web Speech API]
+    B -->|Voz| C[MediaRecorder API]
     B -->|Texto| D[Input Manual]
-    C --> E[Transcripción]
-    D --> E
-    E --> F[Backend FastAPI]
-    F --> G[Gemini API]
-    G --> H{Requiere Recetas?}
-    H -->|Sí| I[Spoonacular API]
-    H -->|No| J[Respuesta Conversacional]
-    I --> K[Mostrar Recetas]
-    J --> L[Mostrar Respuesta]
-    K --> L
-    L --> M[Actualizar Chat]
+    C --> E[Captura Audio]
+    E --> F[Backend FastAPI /speech-to-text]
+    F --> G[Gemini API Transcripción]
+    G --> H[Texto Transcrito]
+    D --> H
+    H --> I[Backend FastAPI /chat]
+    I --> J[Gemini API Chat]
+    J --> K[Respuesta IA]
+    K --> L[Actualizar Chat]
 ```
 
 ---
 
 ## 🚧 Limitaciones Conocidas
 
-- El reconocimiento de voz requiere conexión a internet
-- Spoonacular API tiene límites de peticiones diarias en plan gratuito
-- El reconocimiento de voz funciona mejor en ambientes silenciosos
+- El reconocimiento de voz requiere conexión a internet (usa Gemini API)
+- La transcripción de audio funciona mejor en ambientes silenciosos
 - Algunos navegadores pueden requerir conexión HTTPS para usar el micrófono
 - Backend debe estar corriendo para que funcione la comunicación con Gemini
+- La calidad de transcripción depende de la claridad del audio y del acento del hablante
 
 
 ---

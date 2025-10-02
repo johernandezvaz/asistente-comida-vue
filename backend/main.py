@@ -144,19 +144,6 @@ async def speech_to_text(file: UploadFile = File(...)):
         logging.exception("Error en /api/speech-to-text")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/models")
-async def list_models():
-    if not GEMINI_API_KEY:
-        raise HTTPException(status_code=500, detail="GEMINI_API_KEY no configurada")
-    url = f"{GEMINI_API_URL_BASE}/"
-    async with httpx.AsyncClient(timeout=30.0) as c:
-        r = await c.get(url, params={"key": GEMINI_API_KEY})
-        try:
-            r.raise_for_status()
-        except httpx.HTTPStatusError:
-            raise HTTPException(status_code=r.status_code, detail=r.text)
-        return r.json()
-
 @app.post("/api/chat")
 async def chat(request: ChatRequest):
     try:

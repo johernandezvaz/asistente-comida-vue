@@ -1,5 +1,6 @@
 const SPOONACULAR_API_KEY = import.meta.env.VITE_SPOONACULAR_API_KEY
 const SPOONACULAR_BASE_URL = "https://api.spoonacular.com"
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
 
 export async function searchRecipes(query) {
     try{
@@ -25,6 +26,28 @@ export async function searchRecipes(query) {
     }catch(error){
         console.error('Error searching recipes: ', error)
         return getMockRecipes()
+    }
+}
+
+export async function sendChatMessage(message) {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/chat`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message }),
+        })
+
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status}`)
+        }
+
+        const data = await response.json()
+        return data.response
+    } catch (error) {
+        console.error('Error sending chat message:', error)
+        throw error
     }
 }
 

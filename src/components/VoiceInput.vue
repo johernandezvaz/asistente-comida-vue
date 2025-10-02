@@ -3,8 +3,9 @@ import { ref } from 'vue'
 const emit = defineEmits(['transcript', 'send-message'])
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
 
-const isSupported = ref(true) // MediaRecorder está soportado en la mayoría de navegadores modernos
+const isSupported = ref(true)
 const isListening = ref(false)
+const isProcessing = ref(false)
 const transcript = ref('')
 const manualInput = ref('')
 const error = ref('')
@@ -39,9 +40,11 @@ const toggleListening = async () => {
 
     mediaRecorder.onstop = async () => {
       isListening.value = false
-      const blob = new Blob(audioChunks, { type: "audio/wav" })
+      isProcessing.value = true
+
+      const blob = new Blob(audioChunks, { type: "audio/webm" })
       const formData = new FormData()
-      formData.append("file", blob, "recording.wav")
+      formData.append("file", blob, "recording.webm")
 
       try {
         const res = await fetch(`${BACKEND_URL}/api/speech-to-text`, {
@@ -53,10 +56,15 @@ const toggleListening = async () => {
         }
         const data = await res.json()
         transcript.value = data.transcript || ''
-        emit('transcript', transcript.value)
+
+        if (transcript.value.trim()) {
+          emit('send-message', transcript.value)
+        }
       } catch (err) {
         console.error(err)
         error.value = 'No se pudo transcribir el audio. Intenta de nuevo.'
+      } finally {
+        isProcessing.value = false
       }
     }
 
@@ -108,10 +116,10 @@ const sendManualMessage = () => {
 
         <div class="voice-status-board">
           <span class="status-text">
-            {{ isListening ? '👂 Escuchando...' : '🗣️ Habla conmigo' }}
+            {{ isListening ? '👂 Escuchando...' : isProcessing ? '⚙️ Procesando...' : '🗣️ Habla conmigo' }}
           </span>
           <span class="status-subtext">
-            {{ isListening ? 'Toca la olla para detener' : 'Toca la olla para comenzar' }}
+            {{ isListening ? 'Toca la olla para detener' : isProcessing ? 'Transcribiendo tu audio' : 'Toca la olla para comenzar' }}
           </span>
         </div>
       </div>
