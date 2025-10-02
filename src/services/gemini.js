@@ -1,14 +1,8 @@
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
-
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
 
 export async function generateAIResponse(userMessage, recipes = null) {
     try {
         console.log("Generating AI response for:", userMessage)
-
-        if (!GEMINI_API_KEY) {
-            console.warn("Gemini API key not found, using fallback response")
-            return getFallbackResponse(userMessage, recipes)
-        }
 
         let prompt = `Eres un asistente de cocina amigable y experto en español. Responde de manera conversacional y útil.
 
@@ -23,34 +17,22 @@ Usuario: ${userMessage}`
                 "\nPor favor, presenta estas recetas de manera atractiva y sugiere cuál podría ser mejor según el contexto."
         }
 
-        const response = await fetch(`/api/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`, {
+        const response = await fetch(`${BACKEND_URL}/api/chat`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                contents: [
-                    {
-                        parts: [
-                            {
-                                text: prompt,
-                            },
-                        ],
-                    },
-                ],
-                generationConfig: {
-                    temperature: 0.7,
-                    maxOutputTokens: 500,
-                },
+                message: prompt
             }),
         })
 
         if (!response.ok) {
-            throw new Error(`Gemini API error: ${response.status}`)
+            throw new Error(`Backend API error: ${response.status}`)
         }
 
         const data = await response.json()
-        const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "Lo siento, no pude generar una respuesta."
+        const aiResponse = data.response || "Lo siento, no pude generar una respuesta."
 
         console.log("AI response generated")
         return aiResponse

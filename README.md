@@ -1,10 +1,11 @@
-[# 🍽️ Asistente de Cocina con IA y Voz
+# 🍽️ Asistente de Cocina con IA y Voz
 
 <div align="center">
 
 ![Vue.js](https://img.shields.io/badge/Vue.js-3.x-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-7.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 ![Google Gemini](https://img.shields.io/badge/Google_Gemini-AI-4285F4?style=for-the-badge&logo=google&logoColor=white)
 
 **Prueba Técnica para Artificial Nerds**
@@ -37,6 +38,7 @@ Desarrollar una interfaz intuitiva y accesible que permita a los usuarios descub
 
 ### 🤖 IA Conversacional
 - Integración con **Google Gemini API** para respuestas contextuales inteligentes
+- Backend en **FastAPI** que maneja las peticiones a Gemini de forma segura
 - Procesamiento de lenguaje natural para entender intenciones del usuario
 - Generación de respuestas personalizadas sobre recetas y cocina
 
@@ -68,6 +70,7 @@ Desarrollar una interfaz intuitiva y accesible que permita a los usuarios descub
 | **Vue.js** | 3.5.x | Framework JavaScript progresivo para UI reactiva |
 | **Vite** | 7.x | Build tool y servidor de desarrollo ultrarrápido |
 | **TailwindCSS** | 3.x | Framework CSS utility-first para estilos |
+| **FastAPI** | 0.115.x | Backend API para comunicación segura con Gemini |
 | **Web Speech API** | Nativa | Reconocimiento de voz del navegador |
 | **Google Gemini API** | - | Modelo de IA conversacional |
 | **Spoonacular API** | - | Base de datos de recetas y nutrición |
@@ -78,6 +81,9 @@ Desarrollar una interfaz intuitiva y accesible que permita a los usuarios descub
 
 ```
 asistente-comida-vue/
+├── backend/
+│   ├── main.py                   # Servidor FastAPI
+│   └── requirements.txt          # Dependencias Python
 ├── src/
 │   ├── assets/
 │   │   └── main.css              # Estilos globales y variables CSS
@@ -87,7 +93,7 @@ asistente-comida-vue/
 │   │   └── RecipeCard.vue        # Tarjeta de visualización de recetas
 │   ├── services/
 │   │   ├── api.js                # Servicio de integración Spoonacular
-│   │   └── gemini.js             # Servicio de integración Gemini
+│   │   └── gemini.js             # Servicio que conecta con backend FastAPI
 │   ├── App.vue                   # Componente raíz de la aplicación
 │   └── main.js                   # Punto de entrada de Vue
 ├── index.html                    # Template HTML principal
@@ -100,19 +106,21 @@ asistente-comida-vue/
 
 ### 📦 Componentes Principales
 
-#### `VoiceInput.vue`
+#### Frontend (Vue.js)
+
+**`VoiceInput.vue`**
 - Maneja la captura de voz y entrada de texto
 - Gestiona el ciclo de vida del reconocimiento de voz
 - Emite eventos de transcripción y envío de mensajes
 - Muestra estado de escucha y errores
 
-#### `ChatDisplay.vue`
+**`ChatDisplay.vue`**
 - Renderiza el historial de conversación
 - Diferencia visualmente mensajes de usuario y bot
 - Incluye indicador de carga animado
 - Formatea timestamps de mensajes
 
-#### `RecipeCard.vue`
+**`RecipeCard.vue`**
 - Visualiza información de recetas individuales
 - Muestra imagen, tiempo de preparación y porciones
 - Lista ingredientes principales
@@ -130,9 +138,18 @@ getRecipeDetails(id)
 
 **`gemini.js`**
 ```javascript
-// Generación de respuestas conversacionales
+// Generación de respuestas conversacionales mediante backend
 generateAIResponse(message, recipes)
 ```
+
+#### Backend (FastAPI)
+
+**`main.py`**
+- Servidor FastAPI con CORS habilitado
+- Endpoint `/api/chat` para conversaciones con Gemini
+- Endpoint `/api/recipes` para generación de recetas
+- Manejo seguro de API keys en el servidor
+- Procesamiento de respuestas JSON de Gemini
 
 ---
 
@@ -142,40 +159,69 @@ generateAIResponse(message, recipes)
 
 - **Node.js** >= 18.0.0
 - **npm** >= 9.0.0
+- **Python** >= 3.8
+- **pip** (gestor de paquetes Python)
 - Navegador moderno (Chrome, Edge, Safari) con soporte para Web Speech API
 
 ### Pasos de Instalación
 
-1. **Clonar el repositorio**
-   ```bash
-   git clone https://github.com/johernandezvaz/asistente-comida-vue.git
-   cd asistente-comida-vue
-   ```
+#### 1. Frontend (Vue.js)
 
-2. **Instalar dependencias**
-   ```bash
-   npm install
-   ```
+```bash
+# Clonar el repositorio
+git clone https://github.com/johernandezvaz/asistente-comida-vue.git
+cd asistente-comida-vue
 
-3. **Configurar variables de entorno**
+# Instalar dependencias
+npm install
+```
 
-   Crear archivo `.env` en la raíz del proyecto:
-   ```env
-   GEMINI_API_KEY=tu_clave_gemini_aqui
-   SPOONACULAR_API_KEY=tu_clave_spoonacular_aqui
-   ```
+#### 2. Backend (FastAPI)
 
-4. **Obtener claves API**
+```bash
+# Navegar a la carpeta backend
+cd backend
 
-    - **Gemini API**: Visita [Google AI Studio](https://makersuite.google.com/app/apikey)
-    - **Spoonacular API**: Visita [Spoonacular Console](https://spoonacular.com/food-api/console#Dashboard)
+# Instalar dependencias Python
+pip install -r requirements.txt
+```
 
-5. **Iniciar servidor de desarrollo**
-   ```bash
-   npm run dev
-   ```
+#### 3. Configurar Variables de Entorno
 
-   La aplicación estará disponible en `http://localhost:5173`
+Crear archivo `.env` en la raíz del proyecto:
+
+```env
+# Backend URL
+VITE_BACKEND_URL=http://localhost:8000
+
+# API Keys
+VITE_GEMINI_API_KEY=tu_clave_gemini_aqui
+VITE_SPOONACULAR_API_KEY=tu_clave_spoonacular_aqui
+
+# Supabase (opcional)
+VITE_SUPABASE_URL=tu_url_supabase
+VITE_SUPABASE_ANON_KEY=tu_clave_supabase
+```
+
+#### 4. Obtener Claves API
+
+- **Gemini API**: Visita [Google AI Studio](https://makersuite.google.com/app/apikey)
+- **Spoonacular API**: Visita [Spoonacular Console](https://spoonacular.com/food-api/console#Dashboard)
+
+#### 5. Iniciar la Aplicación
+
+**Terminal 1 - Backend:**
+```bash
+cd backend
+python main.py
+```
+El servidor FastAPI estará disponible en `http://localhost:8000`
+
+**Terminal 2 - Frontend:**
+```bash
+npm run dev
+```
+La aplicación Vue estará disponible en `http://localhost:5173`
 
 ---
 
@@ -213,6 +259,64 @@ generateAIResponse(message, recipes)
 
 ---
 
+## 🔌 Arquitectura API
+
+### Flujo de Comunicación
+
+```
+Usuario → Frontend (Vue.js) → Backend (FastAPI) → Gemini API
+                           ↘
+                             Spoonacular API
+```
+
+### Endpoints del Backend
+
+#### POST `/api/chat`
+Procesa mensajes conversacionales con Gemini.
+
+**Request:**
+```json
+{
+  "message": "Dame una receta con pollo"
+}
+```
+
+**Response:**
+```json
+{
+  "response": "¡Claro! Aquí tienes algunas ideas con pollo..."
+}
+```
+
+#### POST `/api/recipes`
+Genera recetas basadas en ingredientes.
+
+**Request:**
+```json
+{
+  "ingredients": ["pollo", "arroz", "tomate"],
+  "preferences": "fácil y rápida"
+}
+```
+
+**Response:**
+```json
+{
+  "recipes": [
+    {
+      "name": "Arroz con Pollo",
+      "description": "Plato tradicional latinoamericano",
+      "prepTime": "30 minutos",
+      "difficulty": "fácil",
+      "ingredients": ["pollo", "arroz", "tomate"],
+      "instructions": ["Paso 1", "Paso 2"]
+    }
+  ]
+}
+```
+
+---
+
 ## 🎨 Sistema de Diseño Temático
 
 ### Paleta de Colores - Inspirada en la Cocina
@@ -245,35 +349,11 @@ La paleta está inspirada en materiales y elementos de una cocina profesional:
 }
 ```
 
-### Elementos Visuales de Cocina
-
-- **🥣 Contenedor Principal**: Diseñado como un bol de mezcla
-- **🍳 Botón de Voz**: Estilizado como una olla que se calienta
-- **📋 Tabla de Chat**: Simulando una tabla de madera para tomar notas
-- **🔪 Tarjetas de Recetas**: Páginas de libro de cocina con bordes decorativos
-- **🪵 Estantes de Madera**: Header y footer con textura de madera
-- **🔥 Indicador de Estufa**: Llama animada que parpadea
-
-### Animaciones Temáticas
-
-- **Vapor Subiendo**: Anillos que se expanden cuando la "olla" está activa
-- **Llama Parpadeante**: Fuego animado en el indicador de estado
-- **Utensilios Balanceándose**: Cuchara, tenedor y cuchillo con movimiento sutil
-- **Chef Rebotando**: Avatar del chef que se mueve mientras "cocina" respuestas
-- **Vapor Flotante**: Elementos decorativos con movimiento vertical
-
-### Principios de Diseño
-
-- **Espaciado Consistente**: Sistema basado en múltiplos de 8px
-- **Tipografía Divertida**: Comic Sans para darle personalidad y calidez
-- **Feedback Visual**: Animaciones de cocina (vapor, llamas, movimiento)
-- **Experiencia Inmersiva**: Elementos que simulan estar en una cocina real
-- **Colores Cálidos**: Tonos tierra y naturales para ambiente acogedor
-
 ---
 
 ## 🧪 Scripts Disponibles
 
+### Frontend
 ```bash
 # Desarrollo
 npm run dev          # Inicia servidor de desarrollo con HMR
@@ -283,15 +363,25 @@ npm run build        # Genera build optimizado para producción
 npm run preview      # Previsualiza build de producción localmente
 ```
 
+### Backend
+```bash
+# Desarrollo
+python backend/main.py    # Inicia servidor FastAPI en puerto 8000
+
+# Producción
+uvicorn backend.main:app --host 0.0.0.0 --port 8000
+```
+
 ---
 
 ## 🔐 Consideraciones de Seguridad
 
-- Las claves API nunca deben incluirse en el código fuente
-- Usar variables de entorno para información sensible
+- Las claves API se mantienen en el backend (FastAPI) y nunca se exponen al cliente
+- El frontend no hace llamadas directas a Gemini API
+- CORS configurado para permitir solo orígenes autorizados
+- Variables de entorno para información sensible
 - El archivo `.env` debe estar en `.gitignore`
 - Las claves deben rotarse periódicamente
-- Implementar límites de rate en producción
 
 ---
 
@@ -317,14 +407,15 @@ graph TD
     B -->|Texto| D[Input Manual]
     C --> E[Transcripción]
     D --> E
-    E --> F[Procesamiento Gemini AI]
-    F --> G{Requiere Recetas?}
-    G -->|Sí| H[Spoonacular API]
-    G -->|No| I[Respuesta Conversacional]
-    H --> J[Mostrar Recetas]
-    I --> K[Mostrar Respuesta]
-    J --> K
-    K --> L[Actualizar Chat]
+    E --> F[Backend FastAPI]
+    F --> G[Gemini API]
+    G --> H{Requiere Recetas?}
+    H -->|Sí| I[Spoonacular API]
+    H -->|No| J[Respuesta Conversacional]
+    I --> K[Mostrar Recetas]
+    J --> L[Mostrar Respuesta]
+    K --> L
+    L --> M[Actualizar Chat]
 ```
 
 ---
@@ -335,18 +426,8 @@ graph TD
 - Spoonacular API tiene límites de peticiones diarias en plan gratuito
 - El reconocimiento de voz funciona mejor en ambientes silenciosos
 - Algunos navegadores pueden requerir conexión HTTPS para usar el micrófono
+- Backend debe estar corriendo para que funcione la comunicación con Gemini
 
----
-
-## 🔮 Mejoras Futuras
-
-- [ ] Implementar almacenamiento local de recetas favoritas
-- [ ] Añadir soporte multiidioma
-- [ ] Integrar filtros dietéticos (vegetariano, vegano, sin gluten)
-- [ ] Implementar sistema de recomendaciones personalizadas
-- [ ] Añadir modo oscuro
-- [ ] Incluir planificación de menús semanales
-- [ ] Exportar listas de compras
 
 ---
 
@@ -372,6 +453,7 @@ Este proyecto fue desarrollado con fines educativos y de evaluación técnica.
 - **Google Gemini** - Por proporcionar capacidades de IA conversacional
 - **Spoonacular** - Por su extensa base de datos de recetas
 - **Vue.js Community** - Por el excelente framework y documentación
+- **FastAPI** - Por facilitar la creación de APIs rápidas y seguras
 
 ---
 
@@ -382,4 +464,3 @@ Este proyecto fue desarrollado con fines educativos y de evaluación técnica.
 *Prueba Técnica - 2025*
 
 </div>
-]()
